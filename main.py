@@ -1,7 +1,7 @@
 """
 GitHub Project Search Assistant MCP Server
 
-A simple MCP server that helps discover and analyze GitHub projects.
+An MCP server that helps discover and analyze GitHub projects.
 Provides two core tools: search for projects and get repository details.
 """
 
@@ -51,9 +51,9 @@ async def make_github_request(url: str, params: dict[str, Any] | None = None) ->
             return {"error": f"Request failed: {str(e)}"}
 
 
-def build_simple_query(task: str, language: str | None = None) -> str:
+def build_search_query(task: str, language: str | None = None) -> str:
     """
-    Build a simple GitHub search query from a task description.
+    Build a GitHub search query from a task description.
     Uses the task words directly with quality filters.
     """
     # Clean up the task (remove common filler words)
@@ -111,7 +111,7 @@ async def search_github_projects(
         max_results = 10
     
     # Build search query
-    query = build_simple_query(task, language)
+    query = build_search_query(task, language)
     
     # Search GitHub
     url = f"{GITHUB_API_BASE}/search/repositories"
@@ -204,7 +204,7 @@ async def about() -> dict[str, str]:
     """
     return {
         "name": "GitHub Project Search Assistant",
-        "description": "A simple tool to discover and analyze GitHub repositories for your needs",
+        "description": "A tool to discover and analyze GitHub repositories for your needs",
         "tools": [
             {
                 "name": "search_github_projects",
