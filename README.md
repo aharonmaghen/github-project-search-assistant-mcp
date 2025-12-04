@@ -1,57 +1,57 @@
-# Github Project Search Assistant MCP
+# GitHub Project Search Assistant MCP
 
-An MCP (Model Context Protocol) server that helps LLMs discover and analyze GitHub projects to assist users in completing specific tasks. This server searches GitHub for relevant repositories, analyzes their documentation, and provides actionable guidance on how to use them.
+A simple, lightweight MCP (Model Context Protocol) server that helps discover and analyze GitHub projects relevant to specific tasks. Get started quickly without configuration complexity.
 
 ## Features
 
-- **Intelligent Search**: Converts natural language task descriptions into optimized GitHub queries with synonym expansion and smart filtering
-- **Language-Specific Filtering**: Optionally filter results by programming language
-- **Comprehensive Analysis**: Extracts and parses README files to provide structured guidance
-- **Actionable Insights**: Returns installation steps, usage examples, prerequisites, and feature highlights
-- **Repository Metadata**: Provides detailed information about stars, activity, topics, and more
+- **Simple Search**: Find GitHub repositories relevant to what you want to build or accomplish
+- **Language Filtering**: Optionally filter results by programming language
+- **Detailed Repository Information**: Get stats, license info, topics, and links
+- **Lightweight**: All functionality in a single file with minimal dependencies
 
 ## Tools
 
 ### `search_github_projects`
-Search GitHub for GitHub projects relevant to a specific task.
+Search GitHub for repositories that match your task.
 
 **Parameters:**
-- `task` (str): Description of what the user wants to accomplish (e.g., "track my personal finances")
-- `language` (str, optional): Programming language filter (e.g., "Python", "JavaScript")
-- `max_results` (int, optional): Maximum results to return (default: 8, max: 15)
+- `task` (str): What you want to accomplish (e.g., "build a chat app", "track expenses")
+- `language` (str, optional): Programming language to filter by (e.g., "Python", "JavaScript")
+- `max_results` (int, optional): Number of results to return (default: 10, max: 15)
 
-**Returns:** List of repositories with metadata including name, description, stars, language, topics, and URL.
+**Returns:** List of repositories with name, description, stars, language, topics, and URL.
 
-### `get_github_repository_details`
-Get comprehensive metadata for a specific GitHub repository.
+**Example:**
+```
+search_github_projects(task="build a REST API", language="Python", max_results=8)
+```
+
+### `get_repo_details`
+Get detailed information about a specific GitHub repository.
 
 **Parameters:**
 - `owner` (str): Repository owner (username or organization)
 - `repo` (str): Repository name
 
-**Returns:** Detailed repository information including stats, topics, license, activity, and links.
+**Returns:** Repository metadata including description, stars, forks, license, last updated, and links.
 
-### `analyze_github_repository_for_task`
-Analyze a repository and provide guidance on using it for a specific task.
+**Example:**
+```
+get_repo_details(owner="django", repo="django")
+```
 
-**Parameters:**
-- `owner` (str): Repository owner
-- `repo` (str): Repository name
-- `user_task` (str): The task the user wants to accomplish
+### `about`
+Get information about this server and how to use it.
 
-**Returns:** Structured analysis including:
-- Why this repository helps with the task
-- Installation steps and prerequisites
-- Usage guidance and example code
-- Key features
-- Additional resources
+**Returns:** Description of tools, usage examples, and tips for finding repositories.
 
 ## Setup
 
 ### Prerequisites
 
 - [uv](https://github.com/astral-sh/uv) - Fast Python package installer (install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or `pip install uv`)
-- GitHub account (optional, but recommended for higher API rate limits)
+- Python 3.10+
+- GitHub account (optional but recommended for higher API rate limits)
 
 ### Installation
 
@@ -66,114 +66,80 @@ cd github-project-search-assistant-mcp
 uv run mcp install main.py
 ```
 
-That's it! The server is now registered and ready to use.
+Done! The server is now registered and ready to use.
 
 ### Optional: GitHub Token
 
-For higher API rate limits, you can add a GitHub personal access token:
+To get higher API rate limits (1000 requests/hour instead of 60), create a GitHub personal access token:
 
-1. Create a GitHub personal access token:
-   - Go to https://github.com/settings/tokens
-   - Generate a new token (classic)
-   - Select `public_repo` scope (or just `read:user` for public repos)
-   - Copy the token
-
-2. Create a `.env` file:
-```bash
-cp .env.example .env
-```
-
-3. Add your GitHub token to `.env`:
+1. Go to https://github.com/settings/tokens
+2. Create a new token (classic) with `public_repo` scope
+3. Create a `.env` file in this directory:
 ```
 GITHUB_TOKEN=your_token_here
 ```
 
 ## Usage
 
-Once installed, the MCP server will be available to any MCP-compatible client (like Claude Desktop). The server exposes three tools that LLMs can use to help users discover and use GitHub projects.
+Once installed, the MCP server works with any MCP-compatible client. Here's how to use it:
 
-### Example Workflow
+### Basic Workflow
 
-**User:** "I need help keeping track of my finances"
+1. **Search for repositories** matching your task
+   ```
+   search_github_projects(task="build a REST API in Python")
+   ```
 
-1. **LLM calls:** `search_github_projects(task="track my finances", language="Python", max_results=8)`
-   - Server returns top 8 Python repos (e.g., firefly-iii, actual, maybe)
+2. **Get details** about interesting repositories
+   ```
+   get_repo_details(owner="django", repo="django")
+   ```
 
-2. **LLM calls:** `analyze_github_repository_for_task(owner="firefly-iii", repo="firefly-iii", user_task="track my finances")`
-   - Server returns structured guidance including:
-     - Why Firefly III helps with finance tracking
-     - Docker installation steps
-     - Quick start guide
-     - Key features (budgets, recurring transactions, reports)
+3. **Visit the repository** to access documentation and start using it
 
-3. **LLM calls:** `get_github_repository_details(owner="firefly-iii", repo="firefly-iii")`
-   - Server returns comprehensive metadata:
-     - Stars, forks, watchers
-     - License information
-     - Activity and maintenance status
-     - Topics and tags
-     - Links to documentation and homepage
+### Example Scenarios
 
-4. **LLM synthesizes** the information and guides the user through setup
+**"I want to build a web scraper"**
+- Search: `search_github_projects(task="web scraper", language="Python")`
+- Get details: `get_repo_details(owner="scrapy", repo="scrapy")`
+
+**"I need a real-time chat system"**
+- Search: `search_github_projects(task="real-time chat", language="JavaScript")`
+- Get details: `get_repo_details(owner="socketio", repo="socket.io")`
+
+**"I want a task management system"**
+- Search: `search_github_projects(task="task management todo list")`
+- Pick your favorite and get details
 
 ## Rate Limits
 
 - **Without token**: 60 GitHub API requests per hour
-- **With token**: 1000 requests per hour, per repository
+- **With token**: 1000 requests per hour
 
-Adding a GitHub token is highly recommended to avoid hitting rate limits.
+Adding a GitHub token is recommended to avoid hitting rate limits.
 
-## Architecture
+## Project Structure
 
-The server is organized into modular components for clean separation of concerns:
-
-### Project Structure
+Everything is in a single file for simplicity:
 
 ```
-├── main.py                    # Entry point and MCP tool registration
-├── src/
-│   ├── __init__.py           # Package initialization
-│   ├── config.py             # Configuration and constants
-│   ├── github_api.py         # GitHub API utilities and HTTP client
-│   ├── query_builder.py      # Search query generation logic
-│   ├── markdown_parser.py    # README parsing and extraction
-│   └── tools.py              # Core business logic for MCP tools
+├── main.py                    # Complete server with all functionality
+├── .env                       # Optional GitHub token (create if needed)
+└── README.md                  # This file
 ```
 
-### Module Responsibilities
+## How It Works
 
-- **`main.py`**: FastMCP server initialization and tool registration
-- **`config.py`**: Centralized configuration, constants, and environment variables
-- **`github_api.py`**: All GitHub API interactions (search, metadata, README fetching)
-- **`query_builder.py`**: Intelligent search query generation with 50+ topic categories
-- **`markdown_parser.py`**: README parsing and section extraction
-- **`tools.py`**: Business logic that orchestrates the above modules
+1. **Search**: Takes your task description, extracts key words, and searches GitHub repos with quality filters (minimum stars, recent activity)
+2. **Get Details**: Retrieves comprehensive repository metadata from the GitHub API
+3. **Filter**: Optionally filters results by programming language
 
-This modular structure provides:
-- Easy testing of individual components
-- Clear separation between API integration, logic, and tool definition
-- Simple configuration management
-- Extensibility for adding new tools or API integrations
-
-### Technology Stack
-
-The server uses:
-- **FastMCP**: MCP server framework with decorator-based tool definitions
-- **httpx**: Async HTTP client for GitHub API requests
-- **markdown-it-py**: Markdown parsing for README extraction
-- **python-dotenv**: Environment variable management
-
-### Search Algorithm
-
-Search queries are generated using:
-- Synonym expansion across 50+ technical and non-technical topic categories
-- GitHub search qualifiers (stars, forks, language, recency)
-- Multiple query strategies for comprehensive coverage
+The search uses a simple but effective approach:
+- Removes common filler words from your search task
+- Extracts meaningful keywords (3+ characters)
+- Adds quality filters (stars, recency)
+- Optionally filters by language
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
-## License
-
-[Specify your license here]
+Contributions welcome! Feel free to open issues or submit pull requests.

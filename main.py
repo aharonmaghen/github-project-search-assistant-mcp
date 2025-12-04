@@ -1,79 +1,236 @@
 """
-MCP server for discovering and analyzing GitHub projects.
+GitHub Project Search Assistant MCP Server
 
-Helps users find relevant GitHub repositories and provides
-actionable guidance on using them to complete specific tasks.
+A simple MCP server that helps discover and analyze GitHub projects.
+Provides two core tools: search for projects and get repository details.
 """
 
+import os
+import httpx
+from typing import Any
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
-from src.tools import (
-    search_github_projects,
-    get_github_repository_details,
-    analyze_github_repository_for_task,
-)
 
-# Create an MCP server
+# Load environment variables
+load_dotenv()
+
+# Configuration
+GITHUB_API_BASE = "https://api.github.com"
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+HTTP_TIMEOUT = 30.0
+
+# Create MCP server
 mcp = FastMCP("GitHub Project Search Assistant", json_response=True)
 
 
-# Register MCP Tools
+# Helper functions
+
+async def make_github_request(url: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Make an authenticated request to GitHub API."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"Bearer {GITHUB_TOKEN}"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(url, headers=headers, params=params, timeout=HTTP_TIMEOUT)
+            
+            if response.status_code == 403 and "rate limit" in response.text.lower():
+                return {"error": "GitHub API rate limit exceeded. Add GITHUB_TOKEN to .env"}
+            
+            response.raise_for_status()
+            return response.json()
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                return {"error": "Resource not found"}
+            return {"error": f"GitHub API error: {e.response.status_code}"}
+        except Exception as e:
+            return {"error": f"Request failed: {str(e)}"}
+
+
+def build_simple_query(task: str, language: str | None = None) -> str:
+    """
+    Build a simple GitHub search query from a task description.
+    Uses the task words directly with quality filters.
+    """
+    # Clean up the task (remove common filler words)
+    import re
+    task_lower = task.lower()
+    filler_words = {
+        "need", "help", "want", "like", "make", "create", "build", "using",
+        "with", "how", "what", "where", "when", "find", "get", "look",
+        "can", "will", "should", "could", "would", "does", "don't"
+    }
+    
+    # Extract meaningful words (3+ chars)
+    words = re.findall(r'\b\w{3,}\b', task_lower)
+    meaningful_words = [w for w in words if w not in filler_words]
+    
+    # Build query with top keywords
+    if meaningful_words:
+        query = " ".join(meaningful_words[:3])
+    else:
+        query = task_lower[:30]  # Fallback to first 30 chars
+    
+    # Add quality filters
+    query += " stars:>50"
+    
+    # Add language filter if specified
+    if language:
+        query += f" language:{language}"
+    
+    return query
+
+
+# MCP Tools
 
 @mcp.tool()
-async def search_github_projects_tool(
+async def search_github_projects(
     task: str,
     language: str | None = None,
-    max_results: int = 8
-):
+    max_results: int = 10
+) -> dict[str, Any]:
     """
-    Search GitHub for projects relevant to a specific task.
+    Search GitHub for repositories relevant to a specific task.
+    
+    Use this to find projects that can help accomplish a specific goal.
     
     Args:
-        task: Description of what the user wants to accomplish (e.g., "track my personal finances")
-        language: Optional programming language filter (e.g., "Python", "JavaScript")
-        max_results: Maximum number of results to return (default: 8, max: 15)
+        task: What you want to accomplish (e.g., "track my expenses", "build a chat app")
+        language: Optional programming language to filter by (e.g., "Python", "JavaScript")
+        max_results: Number of results to return (1-15, default: 10)
     
     Returns:
-        Dictionary with list of repositories including name, description, stars, language, and topics
+        List of matching repositories with name, description, stars, language, and URL
     """
-    return await search_github_projects(task, language, max_results)
+    # Validate input
+    if max_results < 1 or max_results > 15:
+        max_results = 10
+    
+    # Build search query
+    query = build_simple_query(task, language)
+    
+    # Search GitHub
+    url = f"{GITHUB_API_BASE}/search/repositories"
+    params = {
+        "q": query,
+        "sort": "stars",
+        "order": "desc",
+        "per_page": max_results,
+    }
+    
+    result = await make_github_request(url, params)
+    
+    if "error" in result:
+        return result
+    
+    # Format results
+    repositories = []
+    if "items" in result:
+        for repo in result["items"]:
+            repositories.append({
+                "name": repo["name"],
+                "owner": repo["owner"]["login"],
+                "description": repo.get("description") or "No description available",
+                "stars": repo["stargazers_count"],
+                "language": repo.get("language") or "Not specified",
+                "url": repo["html_url"],
+                "topics": repo.get("topics", [])[:5],  # Top 5 topics
+            })
+    
+    return {
+        "task": task,
+        "total_found": len(repositories),
+        "repositories": repositories,
+    }
 
 
 @mcp.tool()
-async def get_github_repository_details_tool(owner: str, repo: str):
+async def get_repo_details(owner: str, repo: str) -> dict[str, Any]:
     """
-    Get comprehensive metadata and details for a specific GitHub repository.
+    Get detailed information about a specific GitHub repository.
+    
+    Use this to learn more about a repository before deciding to use it.
     
     Args:
-        owner: GitHub username or organization name
-        repo: GitHub repository name
+        owner: Repository owner (username or organization)
+        repo: Repository name
     
     Returns:
-        Detailed repository information including stats, topics, and links
+        Detailed metadata including description, stats, license, and links
     """
-    return await get_github_repository_details(owner, repo)
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}"
+    result = await make_github_request(url)
+    
+    if "error" in result:
+        return result
+    
+    # Extract README URL for documentation
+    readme_url = f"https://github.com/{owner}/{repo}/blob/{result.get('default_branch', 'main')}/README.md"
+    
+    return {
+        "name": result["name"],
+        "owner": result["owner"]["login"],
+        "description": result.get("description") or "No description",
+        "url": result["html_url"],
+        "readme_url": readme_url,
+        "language": result.get("language") or "Not specified",
+        "topics": result.get("topics", []),
+        "stars": result["stargazers_count"],
+        "forks": result["forks_count"],
+        "watchers": result["subscribers_count"],
+        "open_issues": result.get("open_issues_count", 0),
+        "last_updated": result["updated_at"],
+        "license": result.get("license", {}).get("name") if result.get("license") else "No license specified",
+        "homepage": result.get("homepage") or "No homepage provided",
+        "created_at": result["created_at"],
+        "archived": result["archived"],
+        "size_kb": result["size"],
+    }
 
+
+# Server info tool
 
 @mcp.tool()
-async def analyze_github_repository_for_task_tool(
-    owner: str,
-    repo: str,
-    user_task: str
-):
+async def about() -> dict[str, str]:
     """
-    Analyze a GitHub repository and provide guidance on using it for a specific task.
-    Fetches README, extracts key sections, and synthesizes actionable advice.
-    
-    Args:
-        owner: GitHub username or organization name
-        repo: GitHub repository name
-        user_task: The task the user wants to accomplish
+    Get information about what this server does and how to use it.
     
     Returns:
-        Analysis including why the repository helps, how to get started, key features, and requirements
+        Description of available tools and usage examples
     """
-    return await analyze_github_repository_for_task(owner, repo, user_task)
+    return {
+        "name": "GitHub Project Search Assistant",
+        "description": "A simple tool to discover and analyze GitHub repositories for your needs",
+        "tools": [
+            {
+                "name": "search_github_projects",
+                "description": "Search GitHub for repositories matching a task description",
+                "example": "search for 'Python task management tool' or 'JavaScript chat application'"
+            },
+            {
+                "name": "get_repo_details",
+                "description": "Get detailed information about a specific repository",
+                "example": "Get details on a repo by providing the owner and repository name"
+            }
+        ],
+        "how_to_use": [
+            "1. Use search_github_projects to find relevant repositories",
+            "2. Use get_repo_details to learn more about interesting projects",
+            "3. Visit the repository URL to access the project and its documentation"
+        ],
+        "tips": [
+            "Be specific with your search task for better results",
+            "Filter by programming language if you have a preference",
+            "Check stars and forks to gauge project quality",
+            "Visit the README for installation and usage instructions"
+        ]
+    }
 
 
-# Run with streamable HTTP transport
+# Run the server
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
