@@ -1,0 +1,12 @@
+[project]
+name = "open-source-mcp-server"
+version = "0.1.0"
+description = "MCP server for discovering and analyzing open source projects to help users complete tasks"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp[cli]>=1.23.1",
+    "httpx>=0.25.0",
+    "markdown-it-py>=3.0.0",
+    "python-dotenv>=1.0.0",
+]
