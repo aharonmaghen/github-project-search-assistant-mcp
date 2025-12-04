@@ -117,16 +117,50 @@ Adding a GitHub token is highly recommended to avoid hitting rate limits.
 
 ## Architecture
 
+The server is organized into modular components for clean separation of concerns:
+
+### Project Structure
+
+```
+├── main.py                    # Entry point and MCP tool registration
+├── src/
+│   ├── __init__.py           # Package initialization
+│   ├── config.py             # Configuration and constants
+│   ├── github_api.py         # GitHub API utilities and HTTP client
+│   ├── query_builder.py      # Search query generation logic
+│   ├── markdown_parser.py    # README parsing and extraction
+│   └── tools.py              # Core business logic for MCP tools
+```
+
+### Module Responsibilities
+
+- **`main.py`**: FastMCP server initialization and tool registration
+- **`config.py`**: Centralized configuration, constants, and environment variables
+- **`github_api.py`**: All GitHub API interactions (search, metadata, README fetching)
+- **`query_builder.py`**: Intelligent search query generation with 50+ topic categories
+- **`markdown_parser.py`**: README parsing and section extraction
+- **`tools.py`**: Business logic that orchestrates the above modules
+
+This modular structure provides:
+- Easy testing of individual components
+- Clear separation between API integration, logic, and tool definition
+- Simple configuration management
+- Extensibility for adding new tools or API integrations
+
+### Technology Stack
+
 The server uses:
 - **FastMCP**: MCP server framework with decorator-based tool definitions
 - **httpx**: Async HTTP client for GitHub API requests
 - **markdown-it-py**: Markdown parsing for README extraction
 - **python-dotenv**: Environment variable management
 
+### Search Algorithm
+
 Search queries are generated using:
-- Synonym expansion for common terms
-- GitHub search qualifiers (stars, language, recency)
-- Multiple query strategies for better coverage
+- Synonym expansion across 50+ technical and non-technical topic categories
+- GitHub search qualifiers (stars, forks, language, recency)
+- Multiple query strategies for comprehensive coverage
 
 ## Contributing
 
