@@ -121,7 +121,7 @@ async def analyze_github_project_for_task(
 ) -> dict[str, Any]:
     """
     Analyze a GitHub project and provide guidance on using it for a specific task.
-    Fetches README, extracts key sections, and synthesizes actionable advice.
+    Fetches README and synthesizes task-specific actionable advice.
     
     Args:
         owner: GitHub username or organization name
@@ -129,9 +129,9 @@ async def analyze_github_project_for_task(
         user_task: The task the user wants to accomplish
     
     Returns:
-        Analysis including why the project helps, how to get started, key features, and requirements
+        Task-focused analysis including relevance, how to use it, and requirements
     """
-    # Fetch repo metadata and README in parallel
+    # Fetch repo metadata and README
     metadata_result = await get_repo_metadata(owner, repo)
     readme_content = await fetch_readme(owner, repo)
     
@@ -141,12 +141,11 @@ async def analyze_github_project_for_task(
     if not readme_content:
         return {
             "error": "README not found or inaccessible",
-            "suggestion": "Check the repository directly or try the homepage",
-            "url": metadata_result["html_url"],
-            "homepage": metadata_result.get("homepage", ""),
+            "suggestion": "Check the repository directly for documentation",
+            "repository": f"{owner}/{repo}",
         }
     
-    # Extract key sections
+    # Extract key sections from README
     sections = extract_markdown_sections(readme_content)
     
     # Extract code examples from relevant sections
@@ -160,44 +159,28 @@ async def analyze_github_project_for_task(
         usage_text = sections["usage"] or sections["quickstart"]
         usage_examples = extract_code_blocks(usage_text)
     
-    # Build structured analysis
+    # Build task-focused analysis (no metadata duplication)
     analysis = {
         "repository": f"{owner}/{repo}",
-        "url": metadata_result["html_url"],
         "task_context": user_task,
         
-        "why_this_helps": {
-            "description": metadata_result.get("description", ""),
-            "key_topics": metadata_result.get("topics", [])[:5],
-            "popularity": {
-                "stars": metadata_result["stargazers_count"],
-                "forks": metadata_result["forks_count"],
-            },
-            "activity": {
-                "last_updated": metadata_result["updated_at"],
-                "open_issues": metadata_result["open_issues_count"],
-            },
-            "language": metadata_result.get("language", ""),
+        "relevance": {
+            "overview": sections.get("overview", "")[:400] or sections.get("description", "")[:400] or "See README for overview",
+            "key_features": sections.get("features", "")[:500] if sections.get("features") else "See README for detailed features",
+            "use_cases": sections.get("use_cases", "")[:500] if sections.get("use_cases") else "See README for use cases",
         },
         
-        "getting_started": {
-            "prerequisites": sections.get("prerequisites", "")[:500] if sections.get("prerequisites") else "Check README for requirements",
+        "how_to_use": {
+            "prerequisites": sections.get("prerequisites", "")[:400] if sections.get("prerequisites") else "Check README for requirements",
             "installation_steps": install_commands[:3] if install_commands else ["See installation section in README"],
-            "installation_text": sections.get("installation", "")[:800] if sections.get("installation") else "",
-        },
-        
-        "usage_guidance": {
-            "quick_start": sections.get("quickstart", "")[:600] if sections.get("quickstart") else sections.get("usage", "")[:600],
+            "quickstart": sections.get("quickstart", "")[:600] if sections.get("quickstart") else sections.get("usage", "")[:600] if sections.get("usage") else "See README for usage guide",
             "example_code": usage_examples[:2] if usage_examples else [],
         },
         
-        "key_features": sections.get("features", "")[:500] if sections.get("features") else "See README for detailed features",
-        
-        "additional_resources": {
-            "homepage": metadata_result.get("homepage", ""),
-            "has_wiki": metadata_result["has_wiki"],
-            "has_discussions": metadata_result.get("has_discussions", False),
-            "license": metadata_result.get("license", {}).get("name", "Not specified") if metadata_result.get("license") else "Not specified",
+        "important_notes": {
+            "configuration": sections.get("configuration", "")[:300] if sections.get("configuration") else "",
+            "limitations": sections.get("limitations", "")[:300] if sections.get("limitations") else "",
+            "best_practices": sections.get("best_practices", "")[:300] if sections.get("best_practices") else "",
         },
     }
     
