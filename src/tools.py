@@ -159,7 +159,7 @@ async def analyze_github_repository_for_task(
         usage_text = sections["usage"] or sections["quickstart"]
         usage_examples = extract_code_blocks(usage_text)
     
-    # Build task-focused analysis (no metadata duplication)
+    # Build task-focused analysis
     analysis = {
         "repository": f"{owner}/{repo}",
         "task_context": user_task,
