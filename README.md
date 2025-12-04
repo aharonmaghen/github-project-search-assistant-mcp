@@ -50,7 +50,7 @@ Analyze a repository and provide guidance on using it for a specific task.
 
 ### Prerequisites
 
-- Python 3.13 or higher
+- [uv](https://github.com/astral-sh/uv) - Fast Python package installer (install via `curl -LsSf https://astral.sh/uv/install.sh | sh` or `pip install uv`)
 - GitHub account (optional, but recommended for higher API rate limits)
 
 ### Installation
@@ -61,57 +61,65 @@ git clone <repository-url>
 cd github-project-search-assistant-mcp
 ```
 
-2. Install dependencies:
+2. Install the MCP server:
 ```bash
-pip install -e .
+uv run mcp install main.py
 ```
 
-3. (Optional but recommended) Create a GitHub personal access token:
+That's it! The server is now registered and ready to use.
+
+### Optional: GitHub Token
+
+For higher API rate limits, you can add a GitHub personal access token:
+
+1. Create a GitHub personal access token:
    - Go to https://github.com/settings/tokens
    - Generate a new token (classic)
    - Select `public_repo` scope (or just `read:user` for public repos)
    - Copy the token
 
-4. Create a `.env` file:
+2. Create a `.env` file:
 ```bash
 cp .env.example .env
 ```
 
-5. Add your GitHub token to `.env`:
+3. Add your GitHub token to `.env`:
 ```
 GITHUB_TOKEN=your_token_here
 ```
 
 ## Usage
 
-### Running the Server
-
-```bash
-python main.py
-```
-
-The server runs on streamable HTTP transport and exposes three tools that LLMs can use to help users discover and use GitHub projects.
+Once installed, the MCP server will be available to any MCP-compatible client (like Claude Desktop). The server exposes three tools that LLMs can use to help users discover and use GitHub projects.
 
 ### Example Workflow
 
 **User:** "I need help keeping track of my finances"
 
-1. **LLM calls:** `search_github_projects("finance tracking budgeting expense personal")`
-   - Server returns top 8 repos (e.g., firefly-iii, actual, maybe)
+1. **LLM calls:** `search_github_projects(task="track my finances", language="Python", max_results=8)`
+   - Server returns top 8 Python repos (e.g., firefly-iii, actual, maybe)
 
-2. **LLM calls:** `analyze_github_repository_for_task("firefly-iii", "firefly-iii", "track my finances")`
+2. **LLM calls:** `analyze_github_repository_for_task(owner="firefly-iii", repo="firefly-iii", user_task="track my finances")`
    - Server returns structured guidance including:
      - Why Firefly III helps with finance tracking
      - Docker installation steps
      - Quick start guide
      - Key features (budgets, recurring transactions, reports)
 
-3. **LLM synthesizes** the information and guides the user through setup
+3. **LLM calls:** `get_github_repository_details(owner="firefly-iii", repo="firefly-iii")`
+   - Server returns comprehensive metadata:
+     - Stars, forks, watchers
+     - License information
+     - Activity and maintenance status
+     - Topics and tags
+     - Links to documentation and homepage
+
+4. **LLM synthesizes** the information and guides the user through setup
 
 ## Rate Limits
 
-- **Without token**: 10 GitHub API requests per minute
-- **With token**: 30 search requests per minute, 5000 total requests per hour
+- **Without token**: 60 GitHub API requests per hour
+- **With token**: 1000 requests per hour, per repository
 
 Adding a GitHub token is highly recommended to avoid hitting rate limits.
 
