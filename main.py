@@ -9,11 +9,11 @@ from mcp.server.fastmcp import FastMCP
 from src.tools import (
     search_github_projects,
     get_github_repository_details,
-    analyze_github_project_for_task,
+    analyze_github_repository_for_task,
 )
 
 # Create an MCP server
-mcp = FastMCP("GitHub Project Discovery", json_response=True)
+mcp = FastMCP("GitHub Project Search Assistant", json_response=True)
 
 
 # Register MCP Tools
@@ -54,13 +54,13 @@ async def get_github_repository_details_tool(owner: str, repo: str):
 
 
 @mcp.tool()
-async def analyze_github_project_for_task_tool(
+async def analyze_github_repository_for_task_tool(
     owner: str,
     repo: str,
     user_task: str
 ):
     """
-    Analyze a GitHub project and provide guidance on using it for a specific task.
+    Analyze a GitHub repository and provide guidance on using it for a specific task.
     Fetches README, extracts key sections, and synthesizes actionable advice.
     
     Args:
@@ -69,9 +69,9 @@ async def analyze_github_project_for_task_tool(
         user_task: The task the user wants to accomplish
     
     Returns:
-        Analysis including why the project helps, how to get started, key features, and requirements
+        Analysis including why the repository helps, how to get started, key features, and requirements
     """
-    return await analyze_github_project_for_task(owner, repo, user_task)
+    return await analyze_github_repository_for_task(owner, repo, user_task)
 
 
 # Run with streamable HTTP transport

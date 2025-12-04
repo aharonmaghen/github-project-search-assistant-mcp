@@ -1,4 +1,4 @@
-"""Configuration and constants for the GitHub Project Discovery server."""
+"""Configuration and constants for the GitHub Project Search Assistant server."""
 
 import os
 from dotenv import load_dotenv

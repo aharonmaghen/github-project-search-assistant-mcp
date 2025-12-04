@@ -1,7 +1,7 @@
 [project]
-name = "open-source-mcp-server"
+name = "github-project-search-assistant-mcp"
 version = "0.1.0"
-description = "MCP server for discovering and analyzing open source projects to help users complete tasks"
+description = "MCP server for discovering and analyzing GitHub projects to help users complete tasks"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

@@ -1,4 +1,4 @@
-"""MCP tool definitions for GitHub project discovery."""
+"""MCP tool definitions for GitHub Project Search Assistant."""
 
 from typing import Any
 from src.github_api import search_repositories, get_repo_metadata, fetch_readme
@@ -114,13 +114,13 @@ async def get_github_repository_details(owner: str, repo: str) -> dict[str, Any]
     }
 
 
-async def analyze_github_project_for_task(
+async def analyze_github_repository_for_task(
     owner: str,
     repo: str,
     user_task: str
 ) -> dict[str, Any]:
     """
-    Analyze a GitHub project and provide guidance on using it for a specific task.
+    Analyze a GitHub repository and provide guidance on using it for a specific task.
     Fetches README and synthesizes task-specific actionable advice.
     
     Args:

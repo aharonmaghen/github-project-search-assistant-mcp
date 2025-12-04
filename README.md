@@ -1,6 +1,6 @@
-# Open Source Discovery MCP Server
+# Github Project Search Assistant MCP
 
-An MCP (Model Context Protocol) server that helps LLMs discover and analyze open source projects to assist users in completing specific tasks. This server searches GitHub for relevant repositories, analyzes their documentation, and provides actionable guidance on how to use them.
+An MCP (Model Context Protocol) server that helps LLMs discover and analyze GitHub projects to assist users in completing specific tasks. This server searches GitHub for relevant repositories, analyzes their documentation, and provides actionable guidance on how to use them.
 
 ## Features
 
@@ -12,8 +12,8 @@ An MCP (Model Context Protocol) server that helps LLMs discover and analyze open
 
 ## Tools
 
-### `search_open_source_projects`
-Search GitHub for open source projects relevant to a specific task.
+### `search_github_projects`
+Search GitHub for GitHub projects relevant to a specific task.
 
 **Parameters:**
 - `task` (str): Description of what the user wants to accomplish (e.g., "track my personal finances")
@@ -22,7 +22,7 @@ Search GitHub for open source projects relevant to a specific task.
 
 **Returns:** List of repositories with metadata including name, description, stars, language, topics, and URL.
 
-### `get_repository_details`
+### `get_github_repository_details`
 Get comprehensive metadata for a specific GitHub repository.
 
 **Parameters:**
@@ -31,7 +31,7 @@ Get comprehensive metadata for a specific GitHub repository.
 
 **Returns:** Detailed repository information including stats, topics, license, activity, and links.
 
-### `analyze_repository_for_task`
+### `analyze_github_repository_for_task`
 Analyze a repository and provide guidance on using it for a specific task.
 
 **Parameters:**
@@ -40,7 +40,7 @@ Analyze a repository and provide guidance on using it for a specific task.
 - `user_task` (str): The task the user wants to accomplish
 
 **Returns:** Structured analysis including:
-- Why this project helps with the task
+- Why this repository helps with the task
 - Installation steps and prerequisites
 - Usage guidance and example code
 - Key features
@@ -58,7 +58,7 @@ Analyze a repository and provide guidance on using it for a specific task.
 1. Clone this repository:
 ```bash
 git clone <repository-url>
-cd open-source-mcp-server
+cd github-project-search-assistant-mcp
 ```
 
 2. Install dependencies:
@@ -90,16 +90,16 @@ GITHUB_TOKEN=your_token_here
 python main.py
 ```
 
-The server runs on streamable HTTP transport and exposes three tools that LLMs can use to help users discover and use open source projects.
+The server runs on streamable HTTP transport and exposes three tools that LLMs can use to help users discover and use GitHub projects.
 
 ### Example Workflow
 
 **User:** "I need help keeping track of my finances"
 
-1. **LLM calls:** `search_open_source_projects("finance tracking budgeting expense personal")`
+1. **LLM calls:** `search_github_projects("finance tracking budgeting expense personal")`
    - Server returns top 8 repos (e.g., firefly-iii, actual, maybe)
 
-2. **LLM calls:** `analyze_repository_for_task("firefly-iii", "firefly-iii", "track my finances")`
+2. **LLM calls:** `analyze_github_repository_for_task("firefly-iii", "firefly-iii", "track my finances")`
    - Server returns structured guidance including:
      - Why Firefly III helps with finance tracking
      - Docker installation steps

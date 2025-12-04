@@ -113,7 +113,7 @@ def build_search_query(task: str, language: str | None = None) -> list[str]:
         
         # Version Control & Collaboration
         "git": ["git", "version-control", "scm", "github", "gitlab"],
-        "open-source": ["open-source", "opensource", "foss", "community"],
+        "github": ["github", "opensource", "foss", "community"],
         
         # Development Tools
         "cli": ["cli", "command-line", "terminal", "shell", "bash"],
