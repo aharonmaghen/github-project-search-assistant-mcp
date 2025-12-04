@@ -192,44 +192,6 @@ async def get_repo_details(owner: str, repo: str) -> dict[str, Any]:
     }
 
 
-# Server info tool
-
-@mcp.tool()
-async def about() -> dict[str, str]:
-    """
-    Get information about what this server does and how to use it.
-    
-    Returns:
-        Description of available tools and usage examples
-    """
-    return {
-        "name": "GitHub Project Search Assistant",
-        "description": "A tool to discover and analyze GitHub repositories for your needs",
-        "tools": [
-            {
-                "name": "search_github_projects",
-                "description": "Search GitHub for repositories matching a task description",
-                "example": "search for 'Python task management tool' or 'JavaScript chat application'"
-            },
-            {
-                "name": "get_repo_details",
-                "description": "Get detailed information about a specific repository",
-                "example": "Get details on a repo by providing the owner and repository name"
-            }
-        ],
-        "how_to_use": [
-            "1. Use search_github_projects to find relevant repositories",
-            "2. Use get_repo_details to learn more about interesting projects",
-            "3. Visit the repository URL to access the project and its documentation"
-        ],
-        "tips": [
-            "Be specific with your search task for better results",
-            "Filter by programming language if you have a preference",
-            "Check stars and forks to gauge project quality",
-            "Visit the README for installation and usage instructions"
-        ]
-    }
-
 
 # Run the server
 if __name__ == "__main__":

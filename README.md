@@ -40,11 +40,6 @@ Get detailed information about a specific GitHub repository.
 get_repo_details(owner="django", repo="django")
 ```
 
-### `about`
-Get information about this server and how to use it.
-
-**Returns:** Description of tools, usage examples, and tips for finding repositories.
-
 ## Setup
 
 ### Prerequisites
