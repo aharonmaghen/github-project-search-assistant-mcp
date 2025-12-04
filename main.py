@@ -1,8 +1,8 @@
 """
-GitHub Project Search Assistant MCP Server
+GitHub Repository Search Assistant MCP Server
 
-An MCP server that helps discover and analyze GitHub projects.
-Provides two core tools: search for projects and get repository details.
+An MCP server that helps discover and analyze GitHub repositories.
+Provides two core tools: search for repositories and get repository details.
 """
 
 import os
@@ -20,7 +20,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 HTTP_TIMEOUT = 30.0
 
 # Create MCP server
-mcp = FastMCP("GitHub Project Search Assistant", json_response=True)
+mcp = FastMCP("GitHub Repository Search Assistant", json_response=True)
 
 
 # Helper functions
@@ -88,7 +88,7 @@ def build_search_query(task: str, language: str | None = None) -> str:
 # MCP Tools
 
 @mcp.tool()
-async def search_github_projects(
+async def search_github_repositories(
     task: str,
     language: str | None = None,
     max_results: int = 10
@@ -96,7 +96,7 @@ async def search_github_projects(
     """
     Search GitHub for repositories relevant to a specific task.
     
-    Use this to find projects that can help accomplish a specific goal.
+    Use this to find repositories that can help accomplish a specific goal.
     
     Args:
         task: What you want to accomplish (e.g., "track my expenses", "build a chat app")
@@ -149,7 +149,7 @@ async def search_github_projects(
 
 
 @mcp.tool()
-async def get_repo_details(owner: str, repo: str) -> dict[str, Any]:
+async def get_repository_details(owner: str, repository: str) -> dict[str, Any]:
     """
     Get detailed information about a specific GitHub repository.
     
@@ -157,19 +157,19 @@ async def get_repo_details(owner: str, repo: str) -> dict[str, Any]:
     
     Args:
         owner: Repository owner (username or organization)
-        repo: Repository name
+        repository: Repository namey name
     
     Returns:
         Detailed metadata including description, stats, license, and links
     """
-    url = f"{GITHUB_API_BASE}/repos/{owner}/{repo}"
+    url = f"{GITHUB_API_BASE}/repos/{owner}/{repository}"
     result = await make_github_request(url)
     
     if "error" in result:
         return result
     
     # Extract README URL for documentation
-    readme_url = f"https://github.com/{owner}/{repo}/blob/{result.get('default_branch', 'main')}/README.md"
+    readme_url = f"https://github.com/{owner}/{repository}/blob/{result.get('default_branch', 'main')}/README.md"
     
     return {
         "name": result["name"],

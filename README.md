@@ -1,6 +1,6 @@
-# GitHub Project Search Assistant MCP
+# GitHub Repository Search Assistant MCP
 
-A simple, lightweight MCP (Model Context Protocol) server that helps discover and analyze GitHub projects relevant to specific tasks. Get started quickly without configuration complexity.
+A simple, lightweight MCP (Model Context Protocol) server that helps discover and analyze GitHub repositories relevant to specific tasks. Get started quickly without configuration complexity.
 
 ## Features
 
@@ -11,7 +11,7 @@ A simple, lightweight MCP (Model Context Protocol) server that helps discover an
 
 ## Tools
 
-### `search_github_projects`
+### `search_github_repositories`
 Search GitHub for repositories that match your task.
 
 **Parameters:**
@@ -23,21 +23,21 @@ Search GitHub for repositories that match your task.
 
 **Example:**
 ```
-search_github_projects(task="build a REST API", language="Python", max_results=8)
+search_github_repositories(task="build a REST API", language="Python", max_results=8)
 ```
 
-### `get_repo_details`
+### `get_repository_details`
 Get detailed information about a specific GitHub repository.
 
 **Parameters:**
 - `owner` (str): Repository owner (username or organization)
-- `repo` (str): Repository name
+- `repository` (str): Repository name
 
 **Returns:** Repository metadata including description, stars, forks, license, last updated, and links.
 
 **Example:**
 ```
-get_repo_details(owner="django", repo="django")
+get_repository_details(owner="django", repository="django")
 ```
 
 ## Setup
@@ -82,12 +82,12 @@ Once installed, the MCP server works with any MCP-compatible client. Here's how 
 
 1. **Search for repositories** matching your task
    ```
-   search_github_projects(task="build a REST API in Python")
+   search_github_repositories(task="build a REST API in Python")
    ```
 
 2. **Get details** about interesting repositories
    ```
-   get_repo_details(owner="django", repo="django")
+   get_repository_details(owner="django", repository="django")
    ```
 
 3. **Visit the repository** to access documentation and start using it
@@ -95,15 +95,15 @@ Once installed, the MCP server works with any MCP-compatible client. Here's how 
 ### Example Scenarios
 
 **"I want to build a web scraper"**
-- Search: `search_github_projects(task="web scraper", language="Python")`
-- Get details: `get_repo_details(owner="scrapy", repo="scrapy")`
+- Search: `search_github_repositories(task="web scraper", language="Python")`
+- Get details: `get_repository_details(owner="scrapy", repository="scrapy")`
 
 **"I need a real-time chat system"**
-- Search: `search_github_projects(task="real-time chat", language="JavaScript")`
-- Get details: `get_repo_details(owner="socketio", repo="socket.io")`
+- Search: `search_github_repositories(task="real-time chat", language="JavaScript")`
+- Get details: `get_repository_details(owner="socketio", repository="socket.io")`
 
 **"I want a task management system"**
-- Search: `search_github_projects(task="task management todo list")`
+- Search: `search_github_repositories(task="task management todo list")`
 - Pick your favorite and get details
 
 ## Rate Limits
@@ -125,7 +125,7 @@ Everything is in a single file for simplicity:
 
 ## How It Works
 
-1. **Search**: Takes your task description, extracts key words, and searches GitHub repos with quality filters (minimum stars, recent activity)
+1. **Search**: Takes your task description, extracts key words, and searches GitHub repositories with quality filters (minimum stars, recent activity)
 2. **Get Details**: Retrieves comprehensive repository metadata from the GitHub API
 3. **Filter**: Optionally filters results by programming language
 
