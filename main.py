@@ -1,7 +1,7 @@
 """
-MCP server for discovering and analyzing open source projects.
+MCP server for discovering and analyzing GitHub projects.
 
-Helps users find relevant open source repositories and provides
+Helps users find relevant GitHub repositories and provides
 actionable guidance on using them to complete specific tasks.
 """
 
@@ -17,7 +17,7 @@ from mcp.server.fastmcp import FastMCP
 load_dotenv()
 
 # Create an MCP server
-mcp = FastMCP("Open Source Discovery", json_response=True)
+mcp = FastMCP("GitHub Project Discovery", json_response=True)
 
 # GitHub API configuration
 GITHUB_API_BASE = "https://api.github.com"
@@ -226,13 +226,13 @@ def _extract_code_blocks(text: str) -> list[str]:
 # MCP Tools
 
 @mcp.tool()
-async def search_open_source_projects(
+async def search_github_projects(
     task: str,
     language: str | None = None,
     max_results: int = 8
 ) -> dict[str, Any]:
     """
-    Search GitHub for open source projects relevant to a specific task.
+    Search GitHub for projects relevant to a specific task.
     
     Args:
         task: Description of what the user wants to accomplish (e.g., "track my personal finances")
@@ -293,13 +293,13 @@ async def search_open_source_projects(
 
 
 @mcp.tool()
-async def get_repository_details(owner: str, repo: str) -> dict[str, Any]:
+async def get_github_repository_details(owner: str, repo: str) -> dict[str, Any]:
     """
     Get comprehensive metadata and details for a specific GitHub repository.
     
     Args:
-        owner: Repository owner (username or organization)
-        repo: Repository name
+        owner: GitHub username or organization name
+        repo: GitHub repository name
     
     Returns:
         Detailed repository information including stats, topics, and links
@@ -335,18 +335,18 @@ async def get_repository_details(owner: str, repo: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-async def analyze_repository_for_task(
+async def analyze_github_project_for_task(
     owner: str,
     repo: str,
     user_task: str
 ) -> dict[str, Any]:
     """
-    Analyze a repository and provide guidance on using it for a specific task.
+    Analyze a GitHub project and provide guidance on using it for a specific task.
     Fetches README, extracts key sections, and synthesizes actionable advice.
     
     Args:
-        owner: Repository owner (username or organization)
-        repo: Repository name
+        owner: GitHub username or organization name
+        repo: GitHub repository name
         user_task: The task the user wants to accomplish
     
     Returns:
